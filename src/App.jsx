@@ -8,27 +8,53 @@ function App() {
   const [location, setLocation] = useState('');
   const [lat, setLat] = useState(null);
   const [lon, setLon] = useState(null);
+  const [background, setBackground] = useState('');
 
   const apiKey = '895284fb2d2c50a520ea537456963d9c';
   const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=${apiKey}`;
   const geoWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
 
-  const fetchWeatherData = (url) => {
-    axios.get(url).then((response) => {
-      setData(response.data);
-      console.log(response.data);
-    }).catch((error) => {
-      console.log('Error fetching weather data:', error);
-    });
-  };
+  // Fetch weather data
+  function fetchWeatherData(url) {
+    axios
+      .get(url)
+      .then((response) => {
+        console.log('Weather Data:', response.data);
+        setData(response.data);
+        updateBackground(response.data);
+      })
+      .catch((error) => {
+        console.log('Error fetching weather data:', error);
+      });
+  }
 
-  // Fetch weather data based on user input
-  const searchLocation = (event) => {
+  // Search for a location's weather data
+  function searchLocation(event) {
     if (event.key === 'Enter') {
       fetchWeatherData(weatherUrl);
       setLocation('');
     }
-  };
+  }
+
+  // Update background based on weather data
+  function updateBackground(data) {
+    const code = data.weather ? data.weather[0].id : null;
+    const isDay = data.weather && data.weather[0].icon.includes('d');
+
+    console.log('Weather Code:', code);
+    console.log('Is Day:', isDay);
+
+    // Update background based on weather code and time of day
+    if (code === 800) {
+      setBackground(isDay ? '/assets/day/clear.jpg' : '/assets/night/clear.jpg');
+    } else if ([801, 802, 803, 804].includes(code)) {
+      setBackground(isDay ? '/assets/day/cloudy.jpg' : '/assets/night/cloudy.jpg');
+    } else if (code >= 500 && code <= 531) {
+      setBackground(isDay ? '/assets/day/rainy.jpg' : '/assets/night/rainy.jpg');
+    } else {
+      setBackground(isDay ? '/assets/day/snowy.jpg' : '/assets/night/snowy.jpg');
+    }
+  }
 
   // Automatically fetch weather data based on geolocation
   useEffect(() => {
@@ -40,6 +66,7 @@ function App() {
     }
   }, []);
 
+  // Fetch data when lat/lon changes
   useEffect(() => {
     if (lat && lon) {
       fetchWeatherData(geoWeatherUrl);
@@ -47,7 +74,15 @@ function App() {
   }, [lat, lon]);
 
   return (
-    <Box className="app">
+    <Box
+      className="app"
+      sx={{
+        backgroundImage: `url(${background})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        minHeight: '100vh',
+      }}
+    >
       <Container className="container">
         <Box className="search">
           <TextField
@@ -61,7 +96,11 @@ function App() {
               input: { color: '#f8f8f8' },
               label: { color: '#f8f8f8' },
               '& .MuiOutlinedInput-root': {
-                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.8)', borderRadius: "1.5rem", background: 'rgba(255, 255, 255, 0.1)' },
+                '& fieldset': {
+                  borderColor: 'rgba(255, 255, 255, 0.8)',
+                  borderRadius: '1.5rem',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                },
                 '&:hover fieldset': { borderColor: '#fff' },
                 '&.Mui-focused fieldset': { borderColor: '#fff' },
               },
@@ -78,12 +117,20 @@ function App() {
             {data.main ? `${data.main.temp.toFixed()}°C` : null}
           </Typography>
 
-          <Typography variant="h6" className="description">
-            {data.weather ? data.weather[0].main : null}
-          </Typography>
+          {data.weather && (
+            <Box className="weather">
+              <img
+                src={`http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`}
+                alt="weather-icon"
+              />
+              <Typography variant="h6" className="description">
+                {data.weather[0].main}
+              </Typography>
+            </Box>
+          )}
         </Box>
 
-        {data.name !== undefined && (
+        {data.name && (
           <Grid container className="bottom" spacing={2}>
             <Grid item xs={4}>
               <Typography variant="h6" className="bold">

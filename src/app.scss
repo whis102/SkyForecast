@@ -58,8 +58,13 @@ h1 {
 
     .top {
       width: 100%;
-      margin: 1rem auto;
+      // margin: 1rem auto;
       text-align: center;
+
+      .weather img {
+        width: 100px;
+        height: 100px;
+      }
 
       .description {
         position: relative;
