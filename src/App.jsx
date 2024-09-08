@@ -48,43 +48,43 @@ function App() {
 
   return (
     <Box className="app">
-      <Container className="search" sx={{ textAlign: 'center', padding: '1rem' }}>
-        <TextField
-          value={location}
-          onChange={(event) => setLocation(event.target.value)}
-          onKeyPress={searchLocation}
-          label="Enter Location"
-          variant="outlined"
-          fullWidth
-          sx={{
-            input: { color: '#f8f8f8' },
-            label: { color: '#f8f8f8' },
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.8)' },
-              '&:hover fieldset': { borderColor: '#fff' },
-              '&.Mui-focused fieldset': { borderColor: '#fff' },
-            },
-          }}
-        />
-      </Container>
-
       <Container className="container">
+        <Box className="search">
+          <TextField
+            value={location}
+            onChange={(event) => setLocation(event.target.value)}
+            onKeyPress={searchLocation}
+            label="Enter Location"
+            variant="outlined"
+            fullWidth
+            sx={{
+              input: { color: '#f8f8f8' },
+              label: { color: '#f8f8f8' },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.8)', borderRadius: "1.5rem", background: 'rgba(255, 255, 255, 0.1)' },
+                '&:hover fieldset': { borderColor: '#fff' },
+                '&.Mui-focused fieldset': { borderColor: '#fff' },
+              },
+            }}
+          />
+        </Box>
+
         <Box className="top">
-          <Typography variant="h4" className="location" sx={{ textAlign: 'center' }}>
+          <Typography variant="h4" className="location">
             {data.name}
           </Typography>
 
-          <Typography variant="h1" className="temp" sx={{ textAlign: 'center' }}>
+          <Typography variant="h1" className="temp">
             {data.main ? `${data.main.temp.toFixed()}°C` : null}
           </Typography>
 
-          <Typography variant="h6" className="description" sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" className="description">
             {data.weather ? data.weather[0].main : null}
           </Typography>
         </Box>
 
         {data.name !== undefined && (
-          <Grid container className="bottom" spacing={2} sx={{ textAlign: 'center', padding: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.2)', borderRadius: '12px' }}>
+          <Grid container className="bottom" spacing={2}>
             <Grid item xs={4}>
               <Typography variant="h6" className="bold">
                 {data.main ? `${data.main.feels_like.toFixed()}°C` : null}
