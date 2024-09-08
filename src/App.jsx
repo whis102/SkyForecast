@@ -1,65 +1,112 @@
-import { useState } from 'react'
-import axios from 'axios'
-import "./app.scss"
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Box, Container, TextField, Typography, Grid } from '@mui/material';
+import './app.scss';
 
 function App() {
-  const [data, setData] = useState({})
-  const [location, setLocation] = useState('')
+  const [data, setData] = useState({});
+  const [location, setLocation] = useState('');
+  const [lat, setLat] = useState(null);
+  const [lon, setLon] = useState(null);
 
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=imperial&appid=895284fb2d2c50a520ea537456963d9c`
+  const apiKey = '895284fb2d2c50a520ea537456963d9c';
+  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=${apiKey}`;
+  const geoWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
 
+  const fetchWeatherData = (url) => {
+    axios.get(url).then((response) => {
+      setData(response.data);
+      console.log(response.data);
+    }).catch((error) => {
+      console.log('Error fetching weather data:', error);
+    });
+  };
+
+  // Fetch weather data based on user input
   const searchLocation = (event) => {
     if (event.key === 'Enter') {
-      axios.get(url).then((response) => {
-        setData(response.data)
-        console.log(response.data)
-      })
-      setLocation('')
+      fetchWeatherData(weatherUrl);
+      setLocation('');
     }
-  }
+  };
+
+  // Automatically fetch weather data based on geolocation
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        setLat(position.coords.latitude);
+        setLon(position.coords.longitude);
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (lat && lon) {
+      fetchWeatherData(geoWeatherUrl);
+    }
+  }, [lat, lon]);
 
   return (
-    <div className="app">
-      <div className="search">
-        <input
-          value={location}
-          onChange={event => setLocation(event.target.value)}
-          onKeyPress={searchLocation}
-          placeholder='Enter Location'
-          type="text" />
-      </div>
+    <Box className="app">
+      <Container className="container">
+        <Box className="search">
+          <TextField
+            value={location}
+            onChange={(event) => setLocation(event.target.value)}
+            onKeyPress={searchLocation}
+            label="Enter Location"
+            variant="outlined"
+            fullWidth
+            sx={{
+              input: { color: '#f8f8f8' },
+              label: { color: '#f8f8f8' },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.8)', borderRadius: "1.5rem", background: 'rgba(255, 255, 255, 0.1)' },
+                '&:hover fieldset': { borderColor: '#fff' },
+                '&.Mui-focused fieldset': { borderColor: '#fff' },
+              },
+            }}
+          />
+        </Box>
 
-      <div className="container">
-        <div className="top">
-          <div className="location">
-            <p>{data.name}</p>
-          </div>
-          <div className="temp">
-            {data.main ? <h1>{data.main.temp.toFixed()}°F</h1> : null}
-          </div>
-          <div className="description">
-            {data.weather ? <p>{data.weather[0].main}</p> : null}
-          </div>
-        </div>
+        <Box className="top">
+          <Typography variant="h4" className="location">
+            {data.name}
+          </Typography>
 
-        {data.name !== undefined &&
-          <div className="bottom">
-            <div className="feels">
-              {data.main ? <p className='bold'>{data.main.feels_like.toFixed()}°F</p> : null}
-              <p>Feels Like</p>
-            </div>
-            <div className="humidity">
-              {data.main ? <p className='bold'>{data.main.humidity}%</p> : null}
-              <p>Humidity</p>
-            </div>
-            <div className="wind">
-              {data.wind ? <p className='bold'>{data.wind.speed.toFixed()} MPH</p> : null}
-              <p>Wind Speed</p>
-            </div>
-          </div>
-        }
-      </div>
-    </div>
+          <Typography variant="h1" className="temp">
+            {data.main ? `${data.main.temp.toFixed()}°C` : null}
+          </Typography>
+
+          <Typography variant="h6" className="description">
+            {data.weather ? data.weather[0].main : null}
+          </Typography>
+        </Box>
+
+        {data.name !== undefined && (
+          <Grid container className="bottom" spacing={2}>
+            <Grid item xs={4}>
+              <Typography variant="h6" className="bold">
+                {data.main ? `${data.main.feels_like.toFixed()}°C` : null}
+              </Typography>
+              <Typography variant="body1">Feels Like</Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <Typography variant="h6" className="bold">
+                {data.main ? `${data.main.humidity}%` : null}
+              </Typography>
+              <Typography variant="body1">Humidity</Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <Typography variant="h6" className="bold">
+                {data.wind ? `${data.wind.speed.toFixed()} m/s` : null}
+              </Typography>
+              <Typography variant="body1">Wind Speed</Typography>
+            </Grid>
+          </Grid>
+        )}
+      </Container>
+    </Box>
   );
 }
 
