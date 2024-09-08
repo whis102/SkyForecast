@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import axios from 'axios'
+import "./app.scss"
 
 function App() {
   const [data, setData] = useState({})
@@ -27,6 +28,7 @@ function App() {
           placeholder='Enter Location'
           type="text" />
       </div>
+
       <div className="container">
         <div className="top">
           <div className="location">
@@ -56,9 +58,6 @@ function App() {
             </div>
           </div>
         }
-
-
-
       </div>
     </div>
   );
